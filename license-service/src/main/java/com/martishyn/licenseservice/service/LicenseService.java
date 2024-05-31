@@ -1,57 +1,49 @@
 package com.martishyn.licenseservice.service;
 
-import java.util.Locale;
-import java.util.Random;
-
+import com.martishyn.licenseservice.configuration.ServiceConfig;
 import com.martishyn.licenseservice.model.License;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.martishyn.licenseservice.repository.LicenseRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class LicenseService {
 
-    @Autowired
-    MessageSource messages;
+    private final MessageSource messageSource;
 
-    public License getLicense(String licenseId, String organizationId){
-        License license = new License();
-        license.setId(new Random().nextInt(1000));
-        license.setLicenseId(licenseId);
-        license.setOrganizationId(organizationId);
-        license.setDescription("Software product");
-        license.setProductName("Ostock");
-        license.setLicenseType("full");
+    private final LicenseRepository licenseRepository;
 
-        return license;
-    }
+    private final ServiceConfig serviceConfig;
 
-    public String createLicense(License license, String organizationId, Locale locale){
-        String responseMessage = null;
-        if(!StringUtils.isEmpty(license)) {
-            license.setOrganizationId(organizationId);
-            responseMessage = String.format(messages.getMessage("license.create.message",null,locale), license.toString());
+    public License getLicense(String licenseId, String organizationId) {
+        Optional<License> foundLicense = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
+        if (foundLicense.isEmpty()) {
+            throw new IllegalArgumentException(String.format(messageSource.getMessage("license.searcherror.message", null, null), licenseId, organizationId));
         }
-
-        return responseMessage;
+        return foundLicense.get().withComment(serviceConfig.getProperty());
     }
 
-    public String updateLicense(License license, String organizationId){
-        String responseMessage = null;
-        if(!StringUtils.isEmpty(license)) {
-            license.setOrganizationId(organizationId);
-            responseMessage = String.format(messages.getMessage("license.update.message", null, null), license.toString());
-        }
-
-        return responseMessage;
+    public License createLicense(License license) {
+        license.setLicenseId(UUID.randomUUID().toString());
+        licenseRepository.save(license);
+        return license.withComment(serviceConfig.getProperty());
     }
 
-    public String deleteLicense(String licenseId, String organizationId){
-        String responseMessage = null;
-        responseMessage = String.format(messages.getMessage("license.delete.message", null, null),licenseId, organizationId);
-        return responseMessage;
+    //will not call repository save  because dirty reads will update after transaction
+    public License updateLicense(License license) {
+        return license.withComment(serviceConfig.getProperty());
+    }
 
+    public String deleteLicense(String licenseId) {
+        Optional<License> license = licenseRepository.findByLicenseId(licenseId);
+        license.ifPresent(licenseRepository::delete);
+        return String.format(messageSource.getMessage(
+                "license.delete.message", null, null), licenseId);
     }
 }
 

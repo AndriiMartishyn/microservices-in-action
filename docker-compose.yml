@@ -9,11 +9,12 @@ services:
 
     environment:
       - "SPRING_PROFILES_ACTIVE=dev"
-
+      - "SPRING_CONFIG_IMPORT=configserver:http://localhost:8071"
     networks:
       backend:
         aliases:
           - "licenseservice"
+
 networks:
     backend:
       driver: bridge

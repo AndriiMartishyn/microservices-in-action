@@ -2,7 +2,7 @@ package com.martishyn.licenseservice.controller;
 
 import com.martishyn.licenseservice.model.License;
 import com.martishyn.licenseservice.service.LicenseService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,17 +11,16 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
-@RequestMapping(value = "v1/organization/{organizationId}/license")
+@RequestMapping("v1/organization/{organizationId}/license")
+@RequiredArgsConstructor
 public class LicenseController {
 
-    @Autowired
-    private LicenseService licenseService;
+    private final LicenseService licenseService;
 
-    @RequestMapping(value = "/{licenseId}", method = RequestMethod.GET)
-    public ResponseEntity<License> getLicense(@PathVariable("organizationId") String organizationId,
-                                              @PathVariable("licenseId") String licenseId) {
+    @GetMapping("/{licenseId}")
+    public ResponseEntity<License> getLicense(@PathVariable String organizationId, @PathVariable String licenseId) {
 
-        License license = licenseService.getLicense(licenseId, organizationId);
+        License license = licenseService.getLicense(organizationId, licenseId, "");
         license.add(
                 linkTo(methodOn(LicenseController.class).getLicense(organizationId, license.getLicenseId())).withSelfRel(),
                 linkTo(methodOn(LicenseController.class).createLicense(license)).withRel("createLicense"),
@@ -30,6 +29,14 @@ public class LicenseController {
         );
 
         return ResponseEntity.ok(license);
+    }
+
+    @GetMapping( "/{licenseId}/{clientType}")
+    public License getLicensesWithClient(@PathVariable("organizationId") String organizationId,
+                                         @PathVariable("licenseId") String licenseId,
+                                         @PathVariable("clientType") String clientType) {
+
+        return licenseService.getLicense(organizationId, licenseId, clientType);
     }
 
     @PutMapping

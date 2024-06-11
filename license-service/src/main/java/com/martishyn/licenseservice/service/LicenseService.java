@@ -7,12 +7,13 @@ import com.martishyn.licenseservice.repository.LicenseRepository;
 import com.martishyn.licenseservice.service.client.OrganizationDiscoveryClient;
 import com.martishyn.licenseservice.service.client.OrganizationFeignClient;
 import com.martishyn.licenseservice.service.client.OrganizationRestTemplateClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 @Service
 @RequiredArgsConstructor
@@ -66,8 +67,23 @@ public class LicenseService {
                 organization = organizationRestClient.getOrganization(organizationId);
                 break;
         }
-
         return organization;
+    }
+
+    @CircuitBreaker(name = "licenseService", fallbackMethod = "buildFallBackLicenseList")
+    public List<License> getLicensesByOrganization(String organizationId) throws TimeoutException {
+        randomlyRunLong();
+        return licenseRepository.findByOrganizationId(organizationId);
+    }
+
+    private List<License> buildFallBackLicenseList(String organizationId, Throwable t) {
+        List<License> fallbackList = new ArrayList<>();
+        License license = new License();
+        license.setLicenseId("0000000-00-00000");
+        license.setOrganizationId(organizationId);
+        license.setProductName("Sorry no licensing information currently available");
+        fallbackList.add(license);
+        return fallbackList;
     }
 
     public License createLicense(License license) {
@@ -86,6 +102,23 @@ public class LicenseService {
         license.ifPresent(licenseRepository::delete);
         return String.format(messageSource.getMessage(
                 "license.delete.message", null, null), licenseId);
+    }
+
+
+    private void randomlyRunLong() throws TimeoutException {
+        Random rand = new Random();
+        int randomNum = rand.nextInt((3 - 1) + 1) + 1;
+        if (randomNum == 3) sleep();
+    }
+
+    private void sleep() throws TimeoutException {
+        try {
+            System.out.println("Sleep");
+            Thread.sleep(5000);
+            throw new java.util.concurrent.TimeoutException();
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
 

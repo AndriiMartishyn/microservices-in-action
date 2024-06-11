@@ -3,8 +3,12 @@ package com.martishyn.licenseservice.controller;
 import com.martishyn.licenseservice.model.License;
 import com.martishyn.licenseservice.service.LicenseService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.internal.build.AllowSysOut;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -52,6 +56,12 @@ public class LicenseController {
     @DeleteMapping(value = "/{licenseId}")
     public ResponseEntity<String> deleteLicense(@PathVariable String licenseId) {
         return ResponseEntity.ok(licenseService.deleteLicense(licenseId));
+    }
+
+    @RequestMapping(value="/",method = RequestMethod.GET)
+    public List<License> getLicenses(@PathVariable("organizationId") String organizationId) throws TimeoutException {
+//        System.out.println("LicenseServiceController Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
+        return licenseService.getLicensesByOrganization(organizationId);
     }
 }
 

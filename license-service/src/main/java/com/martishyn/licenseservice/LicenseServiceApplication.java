@@ -14,7 +14,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @RefreshScope
-//@EnableDiscoveryClient
+@EnableDiscoveryClient
 @EnableFeignClients
 public class LicenseServiceApplication {
 

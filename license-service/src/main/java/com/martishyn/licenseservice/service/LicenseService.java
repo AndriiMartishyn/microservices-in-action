@@ -2,7 +2,11 @@ package com.martishyn.licenseservice.service;
 
 import com.martishyn.licenseservice.configuration.ServiceConfig;
 import com.martishyn.licenseservice.model.License;
+import com.martishyn.licenseservice.model.Organization;
 import com.martishyn.licenseservice.repository.LicenseRepository;
+import com.martishyn.licenseservice.service.client.OrganizationDiscoveryClient;
+import com.martishyn.licenseservice.service.client.OrganizationFeignClient;
+import com.martishyn.licenseservice.service.client.OrganizationRestTemplateClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -20,12 +24,50 @@ public class LicenseService {
 
     private final ServiceConfig serviceConfig;
 
-    public License getLicense(String licenseId, String organizationId) {
-        Optional<License> foundLicense = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
-        if (foundLicense.isEmpty()) {
-            throw new IllegalArgumentException(String.format(messageSource.getMessage("license.searcherror.message", null, null), licenseId, organizationId));
+    private final OrganizationFeignClient organizationFeignClient;
+
+    private final OrganizationRestTemplateClient organizationRestClient;
+
+    private final OrganizationDiscoveryClient organizationDiscoveryClient;
+
+    public License getLicense(String organizationId, String licenseId, String clientType) {
+        Optional<License> license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
+        if (license.isEmpty()) {
+            throw new IllegalArgumentException(String.format(messageSource.getMessage("license.search.error.message", null, null), licenseId, organizationId));
         }
-        return foundLicense.get().withComment(serviceConfig.getProperty());
+        Organization organization = retrieveOrganizationInfo(organizationId,
+                clientType);
+        if (null != organization) {
+            license.get().setOrganizationName(organization.getName());
+            license.get().setContactName(organization.getContactName());
+            license.get().setContactEmail(organization.getContactEmail());
+            license.get().setContactPhone(organization.getContactPhone());
+        }
+        return license.get().withComment(serviceConfig.getProperty());
+    }
+
+    private Organization retrieveOrganizationInfo(String organizationId, String clientType) {
+        Organization organization = null;
+
+        switch (clientType) {
+            case "feign":
+                System.out.println("I am using the feign client");
+                organization = organizationFeignClient.getOrganization(organizationId);
+                break;
+            case "rest":
+                System.out.println("I am using the rest client");
+                organization = organizationRestClient.getOrganization(organizationId);
+                break;
+            case "discovery":
+                System.out.println("I am using the discovery client");
+                organization = organizationDiscoveryClient.getOrganization(organizationId);
+                break;
+            default:
+                organization = organizationRestClient.getOrganization(organizationId);
+                break;
+        }
+
+        return organization;
     }
 
     public License createLicense(License license) {

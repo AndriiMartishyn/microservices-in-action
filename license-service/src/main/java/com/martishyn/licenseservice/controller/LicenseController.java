@@ -2,7 +2,9 @@ package com.martishyn.licenseservice.controller;
 
 import com.martishyn.licenseservice.model.License;
 import com.martishyn.licenseservice.service.LicenseService;
+import com.martishyn.licenseservice.service.utils.UserContextHolder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.internal.build.AllowSysOut;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("v1/organization/{organizationId}/license")
 @RequiredArgsConstructor
+@Slf4j
 public class LicenseController {
 
     private final LicenseService licenseService;
@@ -60,7 +63,7 @@ public class LicenseController {
 
     @RequestMapping(value="/",method = RequestMethod.GET)
     public List<License> getLicenses(@PathVariable("organizationId") String organizationId) throws TimeoutException {
-//        System.out.println("LicenseServiceController Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
+        log.info("LicenseServiceController Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         return licenseService.getLicensesByOrganization(organizationId);
     }
 }

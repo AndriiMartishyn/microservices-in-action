@@ -7,10 +7,12 @@ import com.martishyn.licenseservice.repository.LicenseRepository;
 import com.martishyn.licenseservice.service.client.OrganizationDiscoveryClient;
 import com.martishyn.licenseservice.service.client.OrganizationFeignClient;
 import com.martishyn.licenseservice.service.client.OrganizationRestTemplateClient;
+import com.martishyn.licenseservice.service.utils.UserContextHolder;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LicenseService {
 
     private final MessageSource messageSource;
@@ -76,11 +79,12 @@ public class LicenseService {
     @Bulkhead(name = "bulkheadLicenseService", fallbackMethod = "buildFallbackLicenseList")
     @Retry(name = "retryLicenseService", fallbackMethod = "buildFallbackLicenseList")
     public List<License> getLicensesByOrganization(String organizationId) throws TimeoutException {
+        log.info("getLicensesByOrganization Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         randomlyRunLong();
         return licenseRepository.findByOrganizationId(organizationId);
     }
 
-    private List<License> buildFallBackLicenseList(String organizationId, Throwable t) {
+    private List<License> buildFallBackLicenseList(String organizationId, Throwable e) {
         List<License> fallbackList = new ArrayList<>();
         License license = new License();
         license.setLicenseId("0000000-00-00000");

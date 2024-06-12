@@ -7,7 +7,9 @@ import com.martishyn.licenseservice.repository.LicenseRepository;
 import com.martishyn.licenseservice.service.client.OrganizationDiscoveryClient;
 import com.martishyn.licenseservice.service.client.OrganizationFeignClient;
 import com.martishyn.licenseservice.service.client.OrganizationRestTemplateClient;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -71,6 +73,8 @@ public class LicenseService {
     }
 
     @CircuitBreaker(name = "licenseService", fallbackMethod = "buildFallBackLicenseList")
+    @Bulkhead(name = "bulkheadLicenseService", fallbackMethod = "buildFallbackLicenseList")
+    @Retry(name = "retryLicenseService", fallbackMethod = "buildFallbackLicenseList")
     public List<License> getLicensesByOrganization(String organizationId) throws TimeoutException {
         randomlyRunLong();
         return licenseRepository.findByOrganizationId(organizationId);

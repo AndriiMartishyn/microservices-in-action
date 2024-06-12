@@ -6,6 +6,11 @@ spring:
   config:
     import: "configserver:http://localhost:8071"
 
+logging:
+  level:
+    org.springframework.web: warn
+    com.martishyn.licenseservice: debug
+
 resilience4j.circuitbreaker:
   configs:
     default:
@@ -42,17 +47,16 @@ resilience4j.thread-pool-bulkhead:
         queueCapacity: 1
         keepAliveDuration: 20
 
-#resilience4j.ratelimiter:
-#  instances:
-#    licenseService:
-#      limitForPeriod: 5
-#      limitRefreshPeriod: 5000
-#      timeoutDuration: 1000ms
-#
-#resilience4j.retry:
-#  instances:
-#    retryLicenseService:
-#      maxRetryAttempts: 5
-#      waitDuration: 10000
-#      retry-exceptions:
-#        - java.util.concurrent.TimeoutException
+resilience4j.ratelimiter:
+  instances:
+    licenseService:
+      limitForPeriod: 5
+      limitRefreshPeriod: 5000
+      timeoutDuration: 1000ms
+
+resilience4j.retry:
+  instances:
+    retryLicenseService:
+      waitDuration: 10000
+      retry-exceptions:
+        - java.util.concurrent.TimeoutException

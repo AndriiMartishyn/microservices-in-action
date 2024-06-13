@@ -17,7 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
-@RequestMapping("v1/organization/{organizationId}/license")
+@RequestMapping("/v1/organization/{organizationId}/license")
 @RequiredArgsConstructor
 @Slf4j
 public class LicenseController {

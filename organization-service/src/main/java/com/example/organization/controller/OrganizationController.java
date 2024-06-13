@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("v1/organization")
+@RequestMapping("/v1/organization")
 @RequiredArgsConstructor
 public class OrganizationController {
 

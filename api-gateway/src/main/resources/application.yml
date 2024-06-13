@@ -44,8 +44,9 @@ eureka:
 
 logging:
   level:
-    org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates:
-      trace
+    com.netflix: warn
+    org.springframework.web: warn
+    com.example.gateway: info
 
 
 

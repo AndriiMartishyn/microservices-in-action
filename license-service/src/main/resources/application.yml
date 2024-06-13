@@ -9,7 +9,7 @@ spring:
 logging:
   level:
     org.springframework.web: warn
-    com.martishyn.licenseservice: debug
+    com.martishyn.licenseservice: info
 
 resilience4j.circuitbreaker:
   configs:

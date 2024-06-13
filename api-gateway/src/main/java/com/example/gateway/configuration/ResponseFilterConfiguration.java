@@ -1,7 +1,6 @@
 package com.example.gateway.configuration;
 
 import com.example.gateway.filters.FilterUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -10,11 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 
-import java.io.ObjectInputFilter;
-
 @Configuration
 @Slf4j
-public class FilterConfiguration {
+public class ResponseFilterConfiguration {
 
     @Autowired
     private FilterUtils filterUtils;

@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://database:5432/ostock_dev?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
+server:
+  port: 8080
+jpa:
+  hibernate:
+    ddl-auto: create

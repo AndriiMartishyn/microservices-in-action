@@ -1,0 +1,43 @@
+server:
+  port: 8072
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: "${EUREKA_URI}"
+  instance:
+    prefer-ip-address: true
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: organization-service
+          uri: lb://organization-service
+          predicates:
+            - Path=/organization/**
+          filters:
+            - PrefixPath=/v1
+            - AddResponseHeader=X-Powered-By, O'stock Organization Service
+        - id: license-service
+          uri: lb://license-service
+          predicates:
+            - Path=/license-service/**
+          filters:
+            - PrefixPath=/v1
+            - AddResponseHeader=X-Powered-By, O'stock License Service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates: trace
+    com.example.gateway: info
+

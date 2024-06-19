@@ -1,10 +1,8 @@
 spring:
   application:
     name: license-service
-  profiles:
-    active: dev
   config:
-    import: "configserver:http://localhost:8071"
+    import: "configserver:${CONFIGSERVER_URI}"
 
 logging:
   level:

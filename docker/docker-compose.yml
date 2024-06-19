@@ -1,0 +1,99 @@
+version: '3'
+services:
+  database:
+    image: postgres:latest
+    container_name: database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "ostock_dev"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - ./data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  configserver:
+    build: ../config-server/.
+    image: config-server/latest
+    container_name: config-server
+    environment:
+      - "SPRING_PROFILES_ACTIVE=native"
+    #      _JAVA_OPTIONS:
+    #       -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    ports:
+      - "8071:8071"
+    #      - '5005:5005'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://config-server:8071/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      database:
+        condition: service_healthy
+  eurekaserver:
+    build: ../discovery-server./
+    image: discovery-server/latest
+    container_name: eureka-server
+    environment:
+      CONFIGSERVER_URI: "http://configserver:8071"
+    ports:
+      - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_healthy
+  gatewayserver:
+    build: ../api-gateway/.
+    image: api-gateway/latest
+    container_name: gateway-server
+    ports:
+      - "8072:8072"
+    environment:
+      PROFILE: "default"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKA_URI: "http://eurekaserver:8070/eureka/"
+    depends_on:
+      configserver:
+        condition: service_healthy
+  licenseservice:
+    build: ../license-service/.
+    image: license-service/latest
+    container_name: license-service
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKA_URI: "http://eurekaserver:8070/eureka/"
+    ports:
+        - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+
+  organizationservice:
+    build: ../organization-service/.
+    image: organization-service/latest
+    container_name: organization-service
+    command: sh -c './wait.sh'
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKA_URI: "http://eurekaserver:8070/eureka/"
+    ports:
+       - "8081:8081"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+

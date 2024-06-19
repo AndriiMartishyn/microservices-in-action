@@ -1,53 +1,9 @@
-server:
-  port: 8072
-
 spring:
-
   application:
     name: gateway-service
   config:
-    import: "configserver:http://localhost:8071"
-
-  cloud:
-    gateway:
-          routes:
-          - id: organization-service
-            uri: lb://organization-service
-            predicates:
-              - Path=/organization/**
-            filters:
-              - PrefixPath=/v1
-              - AddResponseHeader=X-Powered-By, O'stock Organization Service
-          - id: license-service
-            uri: lb://license-service
-            predicates:
-              - Path=/license-service/**
-            filters:
-              - PrefixPath=/v1
-              - AddResponseHeader=X-Powered-By, O'stock License Service
-
-management:
-  endpoints:
-      web:
-        exposure:
-          include: "*"
-  endpoint:
-    gateway:
-      enabled: true
-
-eureka:
-    instance:
-      preferIpAddress: true
-    client:
-      serviceUrl:
-        defaultZone: "http://localhost:8070/eureka"
+    import: "configserver:${CONFIGSERVER_URI}"
 
 logging:
   level:
-    com.netflix: warn
-    org.springframework.web: warn
-    com.example.gateway: info
-
-
-
-
+    org.springframework.cloud.gateway: info

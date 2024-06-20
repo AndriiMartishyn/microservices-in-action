@@ -1,4 +1,4 @@
-version: '3'
+version: '3.6'
 services:
   database:
     image: postgres:latest
@@ -71,13 +71,12 @@ services:
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
     ports:
-        - "8080:8080"
+        - "8180:8080"
     depends_on:
       database:
         condition: service_healthy
       configserver:
         condition: service_healthy
-
   organizationservice:
     build: ../organization-service/.
     image: organization-service/latest
@@ -96,4 +95,20 @@ services:
         condition: service_healthy
       configserver:
         condition: service_healthy
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    restart: always
+    environment:
+        KEYCLOAK_ADMIN : admin
+        KEYCLOAK_ADMIN_PASSWORD: admin
+#    volumes:
+#      - ./realm-export.json:/opt/keycloak/realm-export.json
+    command: start-dev
+#        - "-b 0.0.0.0"
+#        - "-Dkeycloak.import=/opt/keycloak/realm-export.json"
+#        - "-Dkeycloak.profile.feature.scripts=enabled"
+#        - "-Dkeycloak.profile.feature.upload_scripts=enabled"
+    ports:
+        - "8080:8080"
 

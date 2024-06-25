@@ -654,7 +654,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "*********",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -694,7 +694,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "Yi9tBsLSbWVoorOhwZLSsCRWI4aXrBCz",
       "redirectUris": [
         "http://localhost:8081/*"
       ],
@@ -786,50 +786,7 @@
         "phone",
         "offline_access",
         "microprofile-jwt"
-      ],
-      "authorizationSettings": {
-        "allowRemoteResourceManagement": true,
-        "policyEnforcementMode": "ENFORCING",
-        "resources": [
-          {
-            "name": "Default Resource",
-            "type": "urn:ostock:resources:default",
-            "ownerManagedAccess": false,
-            "attributes": {},
-            "_id": "b28525c1-51d2-4e84-9357-105e40b3ca9e",
-            "uris": [
-              "/*"
-            ]
-          }
-        ],
-        "policies": [
-          {
-            "id": "b509dc76-7595-498c-b317-3ee01c53ff06",
-            "name": "Default Policy",
-            "description": "A policy that grants access only for users within this realm",
-            "type": "js",
-            "logic": "POSITIVE",
-            "decisionStrategy": "AFFIRMATIVE",
-            "config": {
-              "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
-            }
-          },
-          {
-            "id": "c6987226-c022-4a44-8467-aed92bf341c8",
-            "name": "Default Permission",
-            "description": "A permission that applies to the default resource type",
-            "type": "resource",
-            "logic": "POSITIVE",
-            "decisionStrategy": "UNANIMOUS",
-            "config": {
-              "defaultResourceType": "urn:ostock:resources:default",
-              "applyPolicies": "[\"Default Policy\"]"
-            }
-          }
-        ],
-        "scopes": [],
-        "decisionStrategy": "UNANIMOUS"
-      }
+      ]
     },
     {
       "id": "9932d34b-3a4f-405a-990e-65541d660cfd",

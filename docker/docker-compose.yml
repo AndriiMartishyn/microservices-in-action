@@ -1,4 +1,4 @@
-version: '3.6'
+version: '3.3'
 services:
   database:
     image: postgres:latest
@@ -22,9 +22,7 @@ services:
     image: config-server/latest
     container_name: config-server
     environment:
-      - "SPRING_PROFILES_ACTIVE=native"
-    #      _JAVA_OPTIONS:
-    #       -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      SPRING_PROFILES_ACTIVE: "native"
     ports:
       - "8071:8071"
     #      - '5005:5005'
@@ -71,7 +69,7 @@ services:
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
     ports:
-        - "8180:8080"
+      - "8180:8080"
     depends_on:
       database:
         condition: service_healthy
@@ -81,15 +79,17 @@ services:
     build: ../organization-service/.
     image: organization-service/latest
     container_name: organization-service
-    command: sh -c './wait.sh'
     environment:
       SPRING_PROFILES_ACTIVE: dev
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
+      _JAVA_OPTIONS:
+        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
-       - "8081:8081"
+      - "8081:8081"
+      - "5005:5005"
     depends_on:
       database:
         condition: service_healthy
@@ -97,18 +97,21 @@ services:
         condition: service_healthy
   keycloak:
     container_name: keycloak
+    hostname: keycloak
     image: quay.io/keycloak/keycloak:latest
     restart: always
-    environment:
-        KEYCLOAK_ADMIN : admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
-#    volumes:
-#      - ./realm-export.json:/opt/keycloak/realm-export.json
-    command: start-dev
-#        - "-b 0.0.0.0"
-#        - "-Dkeycloak.import=/opt/keycloak/realm-export.json"
-#        - "-Dkeycloak.profile.feature.scripts=enabled"
-#        - "-Dkeycloak.profile.feature.upload_scripts=enabled"
     ports:
-        - "8080:8080"
-
+      - "8080:8080"
+    environment:
+         KEYCLOAK_ADMIN: "admin"
+         KEYCLOAK_ADMIN_PASSWORD: "admin"
+         KC_HOSTNAME: keycloak
+    volumes:
+      - ./realms/import:/tmp/import
+    command:
+      [
+       "start-dev",
+       "-Dkeycloak.migration.action=import",
+       "-Dkeycloak.migration.provider=dir",
+       "-Dkeycloak.migration.dir=/tmp/import"
+      ]

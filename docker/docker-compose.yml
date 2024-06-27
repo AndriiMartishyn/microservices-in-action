@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 services:
   database:
     image: postgres:latest
@@ -22,9 +22,7 @@ services:
     image: config-server/latest
     container_name: config-server
     environment:
-      - "SPRING_PROFILES_ACTIVE=native"
-    #      _JAVA_OPTIONS:
-    #       -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      SPRING_PROFILES_ACTIVE: "native"
     ports:
       - "8071:8071"
     #      - '5005:5005'
@@ -70,27 +68,55 @@ services:
       POSTGRES_PASSWORD: "postgres"
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     ports:
-        - "8080:8080"
+      - "8180:8080"
+      - "5006:5006"
     depends_on:
       database:
         condition: service_healthy
       configserver:
         condition: service_healthy
-
   organizationservice:
     build: ../organization-service/.
     image: organization-service/latest
     container_name: organization-service
-    command: sh -c './wait.sh'
     environment:
       SPRING_PROFILES_ACTIVE: dev
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
+      _JAVA_OPTIONS:
+        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
-       - "8081:8081"
+      - "8081:8081"
+      - "5005:5005"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+  keycloak:
+    container_name: keycloak
+    hostname: keycloak
+    image: quay.io/keycloak/keycloak:latest
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+         KEYCLOAK_ADMIN: "admin"
+         KEYCLOAK_ADMIN_PASSWORD: "admin"
+         KC_HOSTNAME: keycloak
+    volumes:
+      - ./realms/import:/tmp/import
+    command:
+      [
+       "start-dev",
+       "-Dkeycloak.migration.action=import",
+       "-Dkeycloak.migration.provider=dir",
+       "-Dkeycloak.migration.dir=/tmp/import"
+      ]
     depends_on:
       database:
         condition: service_healthy

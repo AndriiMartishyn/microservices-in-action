@@ -4,10 +4,25 @@ spring:
   config:
     import: "configserver:${CONFIGSERVER_URI}"
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/spmia-realm
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+jwt:
+  auth:
+    converter:
+      resource-id: ostock
+      principal-attribute: principal_username
+
 logging:
   level:
     org.springframework.web: warn
     com.martishyn.licenseservice: info
+    org.springframework.security: debug
+
 
 resilience4j.circuitbreaker:
   configs:

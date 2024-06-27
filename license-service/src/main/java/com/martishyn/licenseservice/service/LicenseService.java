@@ -80,7 +80,7 @@ public class LicenseService {
     @Retry(name = "retryLicenseService", fallbackMethod = "buildFallbackLicenseList")
     public List<License> getLicensesByOrganization(String organizationId) throws TimeoutException {
         log.info("getLicensesByOrganization Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
-        randomlyRunLong();
+//        randomlyRunLong();
         return licenseRepository.findByOrganizationId(organizationId);
     }
 

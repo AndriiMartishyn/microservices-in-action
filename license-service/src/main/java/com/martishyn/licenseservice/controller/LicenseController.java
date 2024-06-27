@@ -3,6 +3,7 @@ package com.martishyn.licenseservice.controller;
 import com.martishyn.licenseservice.model.License;
 import com.martishyn.licenseservice.service.LicenseService;
 import com.martishyn.licenseservice.service.utils.UserContextHolder;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.internal.build.AllowSysOut;

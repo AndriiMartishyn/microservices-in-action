@@ -29,11 +29,19 @@ public class TrackingFilter implements GlobalFilter {
             exchange = filterUtils.setCorrelationId(exchange, correlationID);
             log.info("tmx-correlation-id generated in tracking filter: {}.", correlationID);
         }
+        if (isAuthTokenPresent(headers)) {
+            log.info("Auth TOKEN found in tracking filter: {}. ",
+                    filterUtils.getAuthToken(headers));
+        }
         return chain.filter(exchange);
     }
 
     private boolean isCorrelationIdPresent(HttpHeaders requestHeaders) {
         return filterUtils.getCorrelationId(requestHeaders) != null;
+    }
+
+    private boolean isAuthTokenPresent(HttpHeaders requestHeaders) {
+        return filterUtils.getAuthToken(requestHeaders) != null;
     }
 
     private String generateCorrelationId() {

@@ -21,8 +21,11 @@ public class ResponseFilterConfiguration {
         return (exchange, chain) -> chain.filter(exchange).then(Mono.fromRunnable(() ->{
             HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
             String correlationId = filterUtils.getCorrelationId(requestHeaders);
+            String token = filterUtils.getAuthToken(requestHeaders);
             log.info("Adding the correlation id to the outbound headers. {}", correlationId);
+            log.info("Adding auth token to the outbound headers. {}", token);
             exchange.getResponse().getHeaders().add(FilterUtils.CORRELATION_ID, correlationId);
+            exchange.getResponse().getHeaders().add(FilterUtils.AUTH_TOKEN, token);
             log.info("Completing outgoing request for {}.", exchange.getRequest().getURI());
         }));
     }

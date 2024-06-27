@@ -68,8 +68,10 @@ services:
       POSTGRES_PASSWORD: "postgres"
       CONFIGSERVER_URI: "http://configserver:8071"
       EUREKA_URI: "http://eurekaserver:8070/eureka/"
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     ports:
       - "8180:8080"
+      - "5006:5006"
     depends_on:
       database:
         condition: service_healthy
@@ -115,3 +117,9 @@ services:
        "-Dkeycloak.migration.provider=dir",
        "-Dkeycloak.migration.dir=/tmp/import"
       ]
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+

@@ -23,6 +23,7 @@ logging:
     com.martishyn.licenseservice: info
     org.springframework.security: debug
 
+
 resilience4j.circuitbreaker:
   configs:
     default:

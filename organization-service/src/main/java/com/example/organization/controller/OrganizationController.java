@@ -15,19 +15,20 @@ public class OrganizationController {
 
     private final OrganizationService organizationService;
 
-    @RolesAllowed({ "ADMIN", "USER" })
+    @RolesAllowed({"ADMIN", "USER"})
     @GetMapping(value = "/{organizationId}")
     public ResponseEntity<Organization> getOrganization(@PathVariable("organizationId") String organizationId) {
         return ResponseEntity.ok(organizationService.findById(organizationId));
     }
 
-    @RolesAllowed({ "ADMIN", "USER" })
+    @RolesAllowed({"ADMIN", "USER"})
     @PutMapping(value = "/{organizationId}")
     public void updateOrganization(@PathVariable("organizationId") String id, @RequestBody Organization organization) {
         organizationService.update(organization);
     }
 
-    @RolesAllowed({ "ADMIN", "USER" })
+
+    @RolesAllowed({"ADMIN", "USER"})
     @PostMapping
     public ResponseEntity<Organization> saveOrganization(@RequestBody Organization organization) {
         return ResponseEntity.ok(organizationService.create(organization));

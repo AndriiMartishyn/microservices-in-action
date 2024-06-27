@@ -14,6 +14,7 @@ public class FilterUtils {
 
     public static final String AUTH_TOKEN = "Authorization";
 
+
     public String getCorrelationId(HttpHeaders requestHeaders) {
         if (requestHeaders.get(CORRELATION_ID) != null) {
             List<String> header = requestHeaders.get(CORRELATION_ID);
@@ -30,13 +31,11 @@ public class FilterUtils {
                 .findFirst().orElse(null);
     }
 
-
     public ServerWebExchange setRequestHeader(ServerWebExchange exchange, String name, String newValue) {
         return exchange.mutate().request(
-                        exchange.getRequest().mutate()
-                                .header(name, newValue)
-                                .build())
-                .build();
+                exchange.getRequest().mutate()
+                        .header(name, newValue)
+                        .build()).build();
     }
 
     public ServerWebExchange setCorrelationId(ServerWebExchange exchange, String correlationId) {

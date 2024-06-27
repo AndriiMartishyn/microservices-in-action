@@ -1,11 +1,7 @@
 package com.martishyn.licenseservice.service.client;
 
 import com.martishyn.licenseservice.model.Organization;
-import com.martishyn.licenseservice.service.utils.UserContextHolder;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
